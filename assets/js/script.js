@@ -13,10 +13,10 @@ $(document).ready(function(){
             processData: false,
             success:function(response)
             {
-                if(response.alertes != null)
-                {
+                if(response.alertes.length > 0)
+                {   
                     audio.play();
-                    //$('#alerte-modal').modal('show');
+                    $('#alerte-modal').modal('show');
                     if (window.confirm("ALERLERLLERR")) {
                         audio.pause();
                     }
