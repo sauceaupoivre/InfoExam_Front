@@ -3,7 +3,7 @@ const audio = new Audio('assets/audio/siren.m4a');
 $(document).ready(function(){
     
     setInterval(function() {
-        var url = "http://localhost/InfoExam_Back/public/api/"+1;
+        var url = "http://127.0.0.1:8000/api/"+1;
         $.ajax({
             url: url,
             method: 'GET',
@@ -26,6 +26,6 @@ $(document).ready(function(){
             error: function(response) {
             }
         });
-      }, 10000);
+      }, 6000000);
 
 });
