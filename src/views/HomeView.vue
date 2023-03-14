@@ -13,6 +13,7 @@ export default defineComponent({
         apiUrl: "",
         date: "",
         disabled: true,
+        loading: false,
 
         examensSallesByDate : [],
         allCartouches : [],
@@ -27,8 +28,11 @@ export default defineComponent({
         }
       },
       getSallesByDate(){
+        this.loading = true;
         axios.get(this.apiUrl + "cartouches/date/" + this.date)
-          .then((response) => {this.examensSallesByDate = response.data;})
+          .then((response) => {
+            this.loading = false;
+            this.examensSallesByDate = response.data;})
           .catch((error) => {console.log("Erreur: ", error)})
       }
     },
@@ -51,7 +55,10 @@ export default defineComponent({
           <div class="d-flex justify-content-center align-items-center">
             <label for="start">Date de l'épreuve:</label>
             <input v-model="this.date" @input="getSallesByDate()" type="date" id="start" name="trip-start" class="ms-2">
-            <p v-if="this.examensSallesByDate.length === 0 && this.date != ''" value='' class="mb-0 ms-3 error">Pas d'épreuves à cette date</p>
+            <div v-if="this.loading" class="spinner-border text-success ms-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p v-if="this.examensSallesByDate.length === 0 && this.date != '' && this.loading != true" value='' class="mb-0 ms-3 error">Pas d'épreuves à cette date</p>
           </div>
         </div>
         <hr>
