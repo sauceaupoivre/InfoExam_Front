@@ -1,6 +1,7 @@
 /* HEADER */
 .header
 {
+    min-height: 91px;
     max-height: 10vh;
     background: rgb(27,89,145);
     background: linear-gradient(90deg, rgba(27,89,145,1) 0%, rgba(9,161,219,1) 50%, rgba(27,89,145,1) 100%);
