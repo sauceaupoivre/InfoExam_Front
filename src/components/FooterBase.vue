@@ -5,7 +5,7 @@
             <img src="@/assets/logo/Qlopex_wide.png">
         </div>
         <div class="d-flex">
-            <a href="http://localhost/InfoExam_Back/public/" class="text-muted me-1" style="text-decoration: none">BACK-OFFICE</a>
+            <a href="//InfoExam_Back.test" target="_blank" class="text-muted me-1" style="text-decoration: none">BACK-OFFICE</a>
         </div>
     </div>
 </template>

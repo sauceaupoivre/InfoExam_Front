@@ -17,6 +17,8 @@ export default ({
         dateEnd: '',
         dateNow: '',
         time: '',
+        alerts: [],
+        pollInterval: null,
       }
     },
     methods: {
@@ -43,6 +45,12 @@ export default ({
       countdown(){
         this.time = this.dateEnd - this.dateNow
       },
+      getAlerts(){
+        axios.get(this.apiUrl + "cartouches/alertes/" + this.$route.params.id)
+          .then((response) => {
+            this.alerts = response.data;})
+          .catch((error) => {console.log("Erreur: ", error)})
+      }
     },
     beforeMount() {
       this.apiUrl = import.meta.env.VITE_API_URL
@@ -55,7 +63,11 @@ export default ({
       setInterval(()=>{
         this.countdown()
       },1000);
-      
+
+      this.pollInterval = setInterval(() =>{
+        this.getAlerts()
+      },120000) //2min
+      setTimeout(() => { clearInterval(this.pollInterval) }, 14400000) //4heures
     },
 })
 </script>
@@ -131,6 +143,17 @@ export default ({
         {{ this.cartouche.fin }} 
 
       </div>
+      <!-- DIV ALERTES -->
+      <div v-if="this.alerts.length != 0" class="p-4 mt-4 ms-3 position-absolute end-0">
+
+        <div v-for="alert in this.alerts" class="alert alert-danger alert-dismissible fade show" role="alert">
+          <h2><i class="bi bi-exclamation-triangle-fill"></i> {{alert.titre}}</h2>
+          <hr>
+          <p>{{alert.description}}</p>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+      </div>
     </div>
   </main>
   
@@ -139,6 +162,9 @@ export default ({
 <style scoped>
   .display-container{
     width: 92ch;
+  }
+  .alert{
+    width: 45ch;
   }
   .dotted{
     border-bottom: 2px dotted black;

@@ -20,7 +20,7 @@ export default ({
 
         disabled: true,
         loading: false,
-        toCartouchClicked: false,
+        toCartoucheClicked: false,
 
         sallesByDate : [],
         formationsByDate : [],
@@ -66,12 +66,11 @@ export default ({
           .catch((error) => {console.log("Erreur: ", error)})
       },
       toCartouche(){
+        this.toCartoucheClicked = true;
         axios.get(this.apiUrl + "examen/" + this.date + "/" + this.salle + "/" + this.formation + "/" + this.epreuve)
           .then((response) => {
             this.loading = false;
             this.cartouche = response.data;
-            this.toCartouchClicked = true;
-            
               this.$router.push({ name: 'cartouche', params: { id: this.cartouche.id } });
             })
           .catch((error) => {console.log("Erreur: ", error)})
@@ -135,7 +134,7 @@ export default ({
         </div> 
         <hr>
 
-        <p v-if="this.cartouche.length === 0 && this.toCartouchClicked == true" class="mb-0 ms-3 error">Pas de cartouche avec ces paramètres.</p>
+        <p v-if="this.cartouche.length === 0 && this.toCartoucheClicked == true" class="mb-0 ms-3 error">Pas de cartouche avec ces paramètres.</p>
 
         <div class="text-center pt-3">
           <button @click="toCartouche()" type="button" class="btn btn-primary" :disabled="this.disabled">Afficher cartouche</button>
