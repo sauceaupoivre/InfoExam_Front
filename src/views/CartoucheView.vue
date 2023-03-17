@@ -12,7 +12,11 @@ export default ({
       return {
         apiUrl: '',
         loading: false,
+        updatingRepere: false,
         cartouche: [],
+        dateEnd: '',
+        dateNow: '',
+        time: '',
       }
     },
     methods: {
@@ -24,14 +28,35 @@ export default ({
             this.cartouche = response.data;})
           .catch((error) => {console.log("Erreur: ", error)})
       },
+      updateRepere(updatedRepere){
+        this.updatingRepere = true
+        axios.put(this.apiUrl + "cartouches/repere/" + this.cartouche.id, {repere: updatedRepere})
+          .then((response) => { this.updatingRepere = false})
+          .catch((error) => {console.error('Erreur : ', error);})
+      },
+      updateComment(updatedCommentaire){
+        this.updatingRepere = true
+        axios.put(this.apiUrl + "cartouches/commentaire/" + this.cartouche.id, {commentaire: updatedCommentaire})
+          .then((response) => { this.updatingRepere = false})
+          .catch((error) => {console.error('Erreur : ', error);})
+      },
+      countdown(){
+        this.time = this.dateEnd - this.dateNow
+      },
     },
     beforeMount() {
       this.apiUrl = import.meta.env.VITE_API_URL
       this.getCartouche()
     },
-    updated(){
-
-    }
+    mounted(){
+      this.dateEnd = new Date(this.cartouche.fin)
+      this.dateNow = new Date(Date.now())
+      
+      setInterval(()=>{
+        this.countdown()
+      },1000);
+      
+    },
 })
 </script>
 
@@ -46,43 +71,66 @@ export default ({
       <div class="display-container">
         <div class="mt-3">
           <router-link to="/">
-            <button class="btn btn-primary px-4"><i class="bi bi-arrow-left"></i></button>
+            <button class="btn btn-primary px-4">Retour</button>
           </router-link>
         </div>
         <!-- CARTOUCHE MANUSCRITE -->
-        <div class="cartouche-manuscrite">
+        <div v-if="this.cartouche.estdematerialise === 0" class="cartouche-manuscrite">
             <div class="d-flex justify-content-between line mb-3">
                 <div class="d-flex"><label>Académie : </label> <b><p class="ms-2">{{ this.cartouche.formation.academie }}</p></b></div>
-                <div class="d-flex"><label>Session : </label> <b><p class="ms-2">{{ this.cartouche.formation.academie }}</p></b></div>
+                <div class="d-flex"><label>Session : </label> <b><p class="ms-2">{{ this.cartouche.session }}</p></b></div>
                 <div class="d-flex"><label class="text-muted">Modèle EN. </label> </div>
             </div>
             <div class="d-flex justify-content-between line mb-3">
-                <div class="d-flex"><label>Examen ou Concours : </label> <b><p class="ms-2">{{ this.cartouche.formation.academie }}</p></b></div>
-                <div class="d-flex me-4"><label>Série : </label> <b><p class="ms-2">{{ this.cartouche.formation.academie }}</p></b></div>
+                <div class="d-flex"><label>Examen ou Concours : </label> <b><p class="ms-2">{{ this.cartouche.epreuve.examen_concours }}</p></b></div>
+                <div class="d-flex me-4"><label>Série : </label> <b><p class="ms-2">{{ this.cartouche.formation.serie }}</p></b></div>
             </div>
             <div class="d-flex justify-content-between line mb-3">
                 <div class="d-flex"><label>Spécialité/option : </label> <b><p class="ms-2">{{ this.cartouche.formation.academie }}</p></b></div>
-                <div class="d-flex me-4"><label>Repère de l'épreuve : </label> <b><p class="ms-2">{{ this.cartouche.formation.academie }}</p></b></div>
+                <div class="d-flex me-4"><label>Repère de l'épreuve : </label> <b><p class="ms-2"></p></b></div>
             </div>
             <div class="d-flex justify-content-between line">
-                <div class="d-flex"><label>Épreuve/sous-épreuve : </label> <b><p class="ms-2">{{ this.cartouche.formation.academie }}</p></b></div>
+                <div class="d-flex"><label>Épreuve/sous-épreuve : </label> <b><p class="ms-2">{{ this.cartouche.epreuve.epreuve }}</p></b></div>
+            </div>
+        </div>
+        <!-- CARTOUCHE DEMATERIALISE -->
+        <div v-else class="cartouche-dematerialise">
+            <div class="d-flex justify-content-between mb-1 flex-grow-1">
+                  <div class="d-flex w-100"><label>Concours&nbsp;/&nbsp;Examen&nbsp;: </label><p class="mx-2 w-100 dotted">{{ this.cartouche.epreuve.examen_concours }}</p></div>
+                  <div class="d-flex me-4"><label>Section&nbsp;/&nbsp;Specialite&nbsp;/&nbsp;Série&nbsp;: </label><p class="ms-2 dotted pe-4">{{ this.cartouche.formation.serie }}</p></div>
+            </div>
+            <div class="d-flex justify-content-between mb-1 flex-grow-1">
+                  <div class="d-flex w-75"><label>Epreuve&nbsp;: </label><p class="mx-2 w-100 dotted">{{ this.cartouche.epreuve.epreuve }}</p></div>
+                  <div class="d-flex me-4 w-25"><label>Matière&nbsp;: </label><p class="ms-2 dotted w-100 pe-4">{{ this.cartouche.epreuve.matiere }}</p></div>
+            </div>
+            <div class="d-flex justify-content-between mb-1 flex-grow-1">
+                  <div class="d-flex w-75"></div>
+                  <div class="d-flex me-4 w-25"><label>Session&nbsp;: </label><p class="ms-2 mb-1 dotted w-100 pe-4">{{ this.cartouche.session }}</p></div>
             </div>
         </div>
 
-        <div class="d-flex justify-content-end mb-3">
-            <label class="me-2 w-25 text-end">Repère de l'épreuve : </label><input class="input w-75" type="text">
+        <div class="d-flex justify-content-end mb-3 position-relative">
+            <label class="me-2 w-25 text-end"><b>Repère de l'épreuve : </b></label>
+            <input  @input="updateRepere(this.cartouche.repere)" v-model="this.cartouche.repere" id="repere" class="input w-75" placeholder="À remplir par le surveillant" type="text">
+            <p class="position-absolute me-2" v-if="this.updatingRepere">Enregistrement...</p>
         </div>
+        
         <div class="d-flex justify-content-end mb-3">
-            <label class="me-2 w-25 text-end">Règles : </label><input class="input w-75" type="text">
+            <label class="me-2 w-25 text-end"><b>Règles : </b></label>
+            <p class="input w-75">
+              <b class="me-3" v-if="this.cartouche.dictionnaire === 1">Dictionnaire,</b>
+              <b class="me-3" v-else="this.cartouche.dictionnaire === 1">Dictionnaire interdit,</b>
+              <b class="mx-3" v-if="this.cartouche.calculatrice === 1">Calculatrice autorisée</b>
+              <b class="mx-3" v-else="this.cartouche.calculatrice === 1">Calculatrice interdite</b>
+            </p>
         </div>
 
-        <textarea class="form-control" placeholder="Commentaire..." rows="3"></textarea>
+        <textarea @input="updateComment(this.cartouche.commentaire)" v-model="this.cartouche.commentaire" class="w-100 bordered p-2" placeholder="Commentaire..." rows="3"></textarea>
         <hr>
 
-      </div>
-      
-      
+        {{ this.cartouche.fin }} 
 
+      </div>
     </div>
   </main>
   
@@ -92,17 +140,29 @@ export default ({
   .display-container{
     width: 92ch;
   }
-  .cartouche-manuscrite{
+  .dotted{
+    border-bottom: 2px dotted black;
+    font-weight: bold;
+  }
+  .cartouche-manuscrite, .cartouche-dematerialise{
     border: 1px solid #ced4da;
     border-radius: .375rem;
     margin: 1rem 0;
     padding: 1rem;
+  }
+  .bordered{
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
   }
   .cartouche-manuscrite p {
     margin-bottom: .2rem;
   }
   .line{
     border-bottom: 1px solid black;
+  }
+  #repere{
+    font-weight: 900;
+    color: rgb(39, 53, 255);
   }
   .input{
     border: none;
