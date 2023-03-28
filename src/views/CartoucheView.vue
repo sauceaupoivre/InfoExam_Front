@@ -151,7 +151,7 @@ export default ({
       <div v-if="this.alerts.length != 0" class="p-4 mt-4 ms-3 position-absolute end-0">
 
         <div v-for="alert in this.alerts" class="alert alert-danger alert-dismissible fade show" role="alert">
-          <h2><i class="bi bi-exclamation-triangle-fill"></i> {{alert.titre}}</h2>
+          <h2 class="blink"><i class="bi bi-exclamation-triangle-fill"></i> {{alert.titre}}</h2>
           <hr>
           <p>{{alert.description}}</p>
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>

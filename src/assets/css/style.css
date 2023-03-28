@@ -116,3 +116,16 @@ td
         height: auto;
     }
 }
+
+.blink{
+   animation-duration: .8s;
+   animation-name: blink;
+   animation-iteration-count: infinite;
+   transition: none;
+}
+
+@keyframes blink {
+  0%   { opacity:1; }
+  40%   {opacity:0; }
+  100% { opacity:1; }
+}
