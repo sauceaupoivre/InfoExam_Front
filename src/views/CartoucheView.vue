@@ -13,6 +13,7 @@ export default ({
         apiUrl: '',
         loading: false,
         updatingRepere: false,
+        updatingCommentaire: false,
         cartouche: [],
         dateEnd: '',
         dateNow: '',
@@ -37,9 +38,9 @@ export default ({
           .catch((error) => {console.error('Erreur : ', error);})
       },
       updateComment(updatedCommentaire){
-        this.updatingRepere = true
+        this.updatingCommentaire = true
         axios.put(this.apiUrl + "cartouches/commentaire/" + this.cartouche.id, {commentaire: updatedCommentaire})
-          .then((response) => { this.updatingRepere = false})
+          .then((response) => { this.updatingCommentaire = false})
           .catch((error) => {console.error('Erreur : ', error);})
       },
       countdown(){
@@ -66,7 +67,7 @@ export default ({
 
       this.pollInterval = setInterval(() =>{
         this.getAlerts()
-      },120000) //2min
+      },10000) //2min
       setTimeout(() => { clearInterval(this.pollInterval) }, 14400000) //4heures
     },
 })
@@ -98,7 +99,7 @@ export default ({
                 <div class="d-flex me-4"><label>Série : </label> <b><p class="ms-2">{{ this.cartouche.formation.serie }}</p></b></div>
             </div>
             <div class="d-flex justify-content-between line mb-3">
-                <div class="d-flex"><label>Spécialité/option : </label> <b><p class="ms-2">{{ this.cartouche.formation.academie }}</p></b></div>
+                <div class="d-flex"><label>Spécialité/option : </label> <b><p class="ms-2">{{ this.cartouche.formation.serie }}</p></b></div>
                 <div class="d-flex me-4"><label>Repère de l'épreuve : </label> <b><p class="ms-2"></p></b></div>
             </div>
             <div class="d-flex justify-content-between line">
@@ -137,7 +138,10 @@ export default ({
             </p>
         </div>
 
-        <textarea @input="updateComment(this.cartouche.commentaire)" v-model="this.cartouche.commentaire" class="w-100 bordered p-2" placeholder="Commentaire..." rows="3"></textarea>
+        <div class="position-relative">
+          <textarea @input="updateComment(this.cartouche.commentaire)" v-model="this.cartouche.commentaire" class="w-100 bordered p-2" placeholder="Commentaire..." rows="3"></textarea>
+          <p class="position-absolute me-3 mt-2 top-0 end-0" v-if="this.updatingCommentaire">Enregistrement...</p>
+        </div>
         <hr>
 
         {{ this.cartouche.fin }} 
