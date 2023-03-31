@@ -20,7 +20,7 @@ export default ({
 
         disabled: true,
         loading: false,
-        toCartoucheClicked: false,
+        noCartouche: false,
 
         sallesByDate : [],
         formationsByDate : [],
@@ -66,12 +66,15 @@ export default ({
           .catch((error) => {console.log("Erreur: ", error)})
       },
       toCartouche(){
-        this.toCartoucheClicked = true;
         axios.get(this.apiUrl + "examen/" + this.date + "/" + this.salle + "/" + this.formation + "/" + this.epreuve)
           .then((response) => {
             this.loading = false;
             this.cartouche = response.data;
-              this.$router.push({ name: 'cartouche', params: { id: this.cartouche.id } });
+              if(this.cartouche.length == 0){
+                this.noCartouche = true
+              }else{
+                this.$router.push({ name: 'cartouche', params: { id: this.cartouche.id } });
+              }
             })
           .catch((error) => {console.log("Erreur: ", error)})
       }
@@ -88,12 +91,10 @@ export default ({
 <template>
   <Header></Header>
   <main>
-    <div class="w-75 m-auto">
+    <div class="w-50 m-auto">
         <h3 class="my-4 text-center">Veuillez sélectionner une date</h3>
 
-        <hr>
-
-        <div class="text-center">
+        <div class="text-center border-top border-bottom py-4" id="Date"> 
           <div class="d-flex justify-content-center align-items-center">
             <label for="start">Date de l'épreuve:</label>
             <input v-model="this.date" @input="callApi()" type="date" id="start" name="trip-start" class="ms-2">
@@ -104,9 +105,7 @@ export default ({
           </div>
         </div>
 
-        <hr>
-
-        <div class="text-center">
+        <div v-if="this.date != '' && this.sallesByDate.length > 0" class="text-center border-bottom py-4" id="Salle">
           <label for="salles">Choisir une salle:</label>
           <select v-model="this.salle" name="salles" class="ms-2">
             <option disabled hidden value="">Pas de salle choisie</option>
@@ -114,30 +113,26 @@ export default ({
           </select>
         </div>
 
-        <hr>
-
-        <div class="text-center">
+        <div v-if="this.salle != '' && this.sallesByDate.length > 0" class="text-center border-bottom py-4" id="Formation">
           <label for="salles">Choisir une formation:</label>
           <select v-model="this.formation" name="formations" class="ms-2">
             <option disabled hidden value="">Pas de formation choisie</option>
             <option v-for="formation in this.formationsByDate" :value="formation.id">{{ formation.nom }}</option>
           </select>
         </div> 
-        <hr>
 
-        <div class="text-center">
+        <div v-if="this.formation != '' && this.sallesByDate.length > 0" class="text-center border-bottom py-4" id="Epreuve">
           <label for="salles">Choisir une épreuve:</label>
           <select v-model="this.epreuve" name="salles" class="ms-2">
             <option disabled hidden value="">Pas d'épreuve choisie</option>
             <option v-for="epreuve in this.epreuvesByDate" :value="epreuve.id">{{ epreuve.matiere }}</option>
           </select>
         </div> 
-        <hr>
 
-        <p v-if="this.cartouche.length === 0 && this.toCartoucheClicked == true" class="mb-0 ms-3 error">Pas de cartouche avec ces paramètres.</p>
+        <p v-if="this.noCartouche == true" class="mb-0 ms-3 error">Pas de cartouche avec ces paramètres.</p>
 
-        <div class="text-center pt-3">
-          <button @click="toCartouche()" type="button" class="btn btn-primary" :disabled="this.disabled">Afficher cartouche</button>
+        <div class="text-center pt-4">
+          <button @click="toCartouche()" type="button" class="btn btn-primary px-4" :disabled="this.disabled">Afficher cartouche</button>
         </div>
         
     </div>
