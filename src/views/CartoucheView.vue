@@ -16,11 +16,9 @@ export default ({
         updatingCommentaire: false,
         updatingAlerte: false,
         cartouche: [],
-        dateEnd: '',
-        dateNow: '',
-        time: '',
         alerts: [],
         pollInterval: null,
+        clockInterval:null,
         startHour: null,
       }
     },
@@ -72,8 +70,8 @@ export default ({
         
         h = (h < 10) ? "0" + h : h;
         m = (m < 10) ? "0" + m : m;
-        
         let time = h + ":" + m ;
+
         document.getElementById("StartTime").textContent = time;
         document.getElementById("EndTime").textContent = (this.startHour.getHours() + datefin.getHours())+ ":" + m ;
         document.getElementById("LeaveTime").textContent = (this.startHour.getHours() + sortieAllow.getHours()) + ":" + m ;
@@ -85,7 +83,6 @@ export default ({
         var h = date.getHours(); // 0 - 23
         var m = date.getMinutes(); // 0 - 59
         var s = date.getSeconds(); // 0 - 59
-       
         
         h = (h < 10) ? "0" + h : h;
         m = (m < 10) ? "0" + m : m;
@@ -94,8 +91,8 @@ export default ({
         var time = h + ":" + m + ":" + s + " " ;
        
         document.getElementById("CurrentTime").textContent = time;
-        
-        setTimeout(this.currentTime, 1000);
+       
+        //setTimeout(this.currentTime, 1000);
       }
     },
     beforeMount() {
@@ -104,19 +101,23 @@ export default ({
       
     },
     mounted(){
-      this.dateEnd = new Date(this.cartouche.fin)
-      this.dateNow = new Date(Date.now())
-      this.getAlerts()
+      this.getAlerts() //recup les alertes dès le chargement de la page
+
+      //Poll get alertes
       this.pollInterval = setInterval(() =>{
         this.getAlerts()
       },10000) //2min
-      setTimeout(() => { clearInterval(this.pollInterval) }, 14400000) //4heures
-    },
-    updated(){
-      this.currentTime();
+      setTimeout(() => { clearInterval(this.pollInterval) }, 14400000) //arret auto au bout de 4heures
+
+      //Interval de l'horloge
+      this.clockInterval = setInterval(() =>{
+          this.currentTime()
+      },1000)
+      setTimeout(() => { clearInterval(this.clockInterval) }, 14400000) //arret auto au bout de 4heures
     },
     unmounted(){
       clearInterval(this.pollInterval)
+      clearInterval(this.clockInterval)
     }
     
 })
