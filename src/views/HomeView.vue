@@ -70,8 +70,8 @@ export default ({
           .then((response) => {
             this.loading = false;
             this.cartouche = response.data;
-              if(this.cartouche.length == 0){
-                this.noCartouche = true
+              if(jQuery.isEmptyObject(response.data)){
+                this.noCartouche = true;
               }else{
                 this.$router.push({ name: 'cartouche', params: { id: this.cartouche.id } });
               }
@@ -129,7 +129,7 @@ export default ({
           </select>
         </div> 
 
-        <p v-if="this.noCartouche == true" class="mb-0 ms-3 error">Pas de cartouche avec ces paramètres.</p>
+        <p v-if="this.noCartouche === true" class="mb-0 ms-3 text-center mt-3 error">Pas de cartouche avec ces paramètres.</p>
 
         <div class="text-center pt-4">
           <button @click="toCartouche()" type="button" class="btn btn-primary px-4" :disabled="this.disabled">Afficher cartouche</button>
