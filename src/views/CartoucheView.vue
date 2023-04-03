@@ -21,6 +21,7 @@ export default ({
         pollInterval: null,
         clockInterval:null,
         startHour: null,
+        starthourEdit: '',
       }
     },
     methods: {
@@ -32,19 +33,19 @@ export default ({
             this.cartouche = response.data;})
           .catch((error) => {console.log("Erreur: ", error)})
       },
-      updateRepere(updatedRepere){
+      updateRepere(updatedRepere){ //mets à jour le repere
         this.updatingRepere = true
         axios.put(this.apiUrl + "cartouches/repere/" + this.cartouche.id, {repere: updatedRepere})
           .then((response) => { this.updatingRepere = false})
           .catch((error) => {console.error('Erreur : ', error);})
       },
-      updateComment(updatedCommentaire){
+      updateComment(updatedCommentaire){ //mets à jour le commentaire
         this.updatingCommentaire = true
         axios.put(this.apiUrl + "cartouches/commentaire/" + this.cartouche.id, {commentaire: updatedCommentaire})
           .then((response) => { this.updatingCommentaire = false})
           .catch((error) => {console.error('Erreur : ', error);})
       },
-      alertDone(alerteId){
+      alertDone(alerteId){ //marque l'alerte comme ayant été vu
         this.updatingAlerte = true
         axios.put(this.apiUrl + "cartouches/alerte/done/" + alerteId)
           .then((response) => { 
@@ -53,58 +54,41 @@ export default ({
           })
           .catch((error) => {console.error('Erreur : ', error);})
       },
-      getAlerts(){
+      getAlerts(){ //recupere les alertes
         axios.get(this.apiUrl + "cartouches/alertes/" + this.$route.params.id)
           .then((response) => {
             this.alerts = response.data;})
           .catch((error) => {console.log("Erreur: ", error)})
       },
-      startClock(){
+      startClock(){ //Calcule tous les temps de sortis etc..
         if(this.startHour === null){
-          this.startHour = new Date()
+          this.startHour = moment()
         }
-        const datefin = new Date("2011-10-10T"+this.cartouche.epreuve.duree)
-        const sortieAllow = new Date(this.cartouche.epreuve.loge)
+        let datefin = moment("2011-10-10 "+this.cartouche.epreuve.duree);
+        let sortieAllow = moment(this.cartouche.epreuve.loge)
         
-        let h = this.startHour.getHours(); // 0 - 23
-        let m = this.startHour.getMinutes(); // 0 - 59
-
-        const dateTiersTemps = moment(this.startHour).add(datefin.getHours() + this.tiersTemps(this.cartouche.epreuve.duree).Hours,'hours')
+        let dateTiersTemps = moment(this.startHour)
+        dateTiersTemps.add(datefin.hours() + this.tiersTemps(this.cartouche.epreuve.duree).Hours,'hours')
         dateTiersTemps.add(this.tiersTemps(this.cartouche.epreuve.duree).Minutes,'minutes')
-        console.log(dateTiersTemps)
-        
-        h = (h < 10) ? "0" + h : h;
-        m = (m < 10) ? "0" + m : m;
-        let time = h + ":" + m ;
 
-        document.getElementById("StartTime").textContent = time;
-        document.getElementById("EndTime").textContent = (this.startHour.getHours() + datefin.getHours())+ ":" + m ;
-        document.getElementById("LeaveTime").textContent = (this.startHour.getHours() + sortieAllow.getHours()) + ":" + m ;
-        document.getElementById("TiersTemps").textContent = this.startHour.getHours() + datefin.getHours() + this.tiersTemps(this.cartouche.epreuve.duree).Hours + ":"  + (m + this.tiersTemps(this.cartouche.epreuve.duree).Minutes)
-        
-        //setTimeout(this.startClock, 1000);
+        document.getElementById("StartTime").textContent = this.startHour.format("HH:mm");
+        document.getElementById("LeaveTime").textContent = moment(this.startHour).add(sortieAllow.hours(),'hours').format("HH:mm")
+        document.getElementById("EndTime").textContent = moment(this.startHour).add(datefin.hours(),'hours').format("HH:mm")
+        document.getElementById("TiersTemps").textContent = dateTiersTemps.format("HH:mm")
       },
-      currentTime(){
-        var date = new Date();
-        var h = date.getHours(); // 0 - 23
-        var m = date.getMinutes(); // 0 - 59
-        var s = date.getSeconds(); // 0 - 59
-        
-        h = (h < 10) ? "0" + h : h;
-        m = (m < 10) ? "0" + m : m;
-        s = (s < 10) ? "0" + s : s;
-        
-        var time = h + ":" + m + ":" + s + " " ;
-       
-        document.getElementById("CurrentTime").textContent = time;
-       
-        //setTimeout(this.currentTime, 1000);
+      editStartHour(){
+        this.startHour = moment("2011-10-10 "+this.starthourEdit+":00")
+        this.startClock()
+      },
+      currentTime(){ //fonction Horloge
+        let time = moment();
+        document.getElementById("CurrentTime").textContent = time.format("HH:mm:ss");
       },
       tiersTemps(date){
-        let ladate = new Date("2011-10-10T"+date)
-        let hourSeconds = ladate.getHours()*60*60;
-        let  minuteSeconds = ladate.getMinutes()*60
-        let seconds = ladate.getSeconds()
+        let newDate = new Date("2011-10-10T"+date)
+        let hourSeconds = newDate.getHours()*60*60;
+        let  minuteSeconds = newDate.getMinutes()*60
+        let seconds = newDate.getSeconds()
         
         let tiersTempsInSeconds = (hourSeconds+minuteSeconds+seconds)/3
         let fullHours = Math.trunc(tiersTempsInSeconds / 3600)
@@ -112,6 +96,10 @@ export default ({
 
         return {Hours:fullHours, Minutes: fullMinutes}
         
+      },
+      onSubmit(e) {
+        e.preventDefault();
+        this.editStartHour()
       }
     },
     beforeMount() {
@@ -122,7 +110,7 @@ export default ({
     mounted(){
       this.getAlerts() //recup les alertes dès le chargement de la page
 
-      //Poll get alertes
+      //Poll sur getAlertes
       this.pollInterval = setInterval(() =>{
         this.getAlerts()
       },10000) //2min
@@ -133,6 +121,9 @@ export default ({
           this.currentTime()
       },1000)
       setTimeout(() => { clearInterval(this.clockInterval) }, 14400000) //arret auto au bout de 4heures
+    },
+    updated(){
+      this.currentTime()
     },
     unmounted(){
       clearInterval(this.pollInterval)
@@ -219,31 +210,33 @@ export default ({
         <div class="clock-container text-center">
           
           <button v-if="this.startHour == null" class="btn btn-primary px-4" type="button" @click="startClock()">Démarrer l'épreuve <i class="bi bi-play-fill"></i></button>
-          <form v-if="this.startHour != null" class="d-flex align-items-center justify-content-center">
-            <input type="time" class="form-control w-25 " min="00:00" max="24:00" required>
+          <form v-if="this.startHour != null" class="d-flex align-items-center justify-content-center" v-on:submit.prevent="onSubmit">
+            <input v-model="this.starthourEdit" type="time" class="form-control w-25 " min="00:00" max="24:00" required>
             <button class="btn btn-primary" type="submit">Changer&nbsp;l'heure&nbsp;de&nbsp;début</button> 
           </form>
 
           <div id="CurrentTime" class="currentClock"></div>
 
-          <div class="d-flex justify-content-between">
-              <div class="d-flex justify-content-center mx-2 clock">
-                <label for="StartTime">Heure de début :&nbsp;</label>
-                <div id="StartTime"></div>
-              </div>
-              <div class="d-flex justify-content-center mx-2 clock">
-                <label for="LeaveTime">Sortie autorisée :&nbsp;</label>
-                <div id="LeaveTime"></div>
-              </div>
-              <div class="d-flex justify-content-center mx-2 clock">
-                <label for="EndTime">Heure de fin :&nbsp;</label>
-                <div id="EndTime" ></div>
-              </div>
-              <div class="d-flex justify-content-center mx-2 clock">
-                <label for="TiersTemps">Heure de fin tiers temps :&nbsp;</label>
-                <div id="TiersTemps" ></div>
-              </div>
-          </div>
+
+          <table class="table bordered clock table-bordered shadow">
+            <thead class="blue">
+              <tr>
+                <td scope="col">Heure de début </td>
+                <td scope="col">Sortie autorisée</td>
+                <td scope="col">Heure de fin</td>
+                <td scope="col">Fin tiers-temps</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="StartTime"></td>
+                <td id="LeaveTime"></td>
+                <td id="EndTime"></td>
+                <td id="TiersTemps"></td>
+              </tr>
+            </tbody>
+          </table>
+
         </div>
       </div>
       
@@ -299,12 +292,19 @@ export default ({
     margin: 1rem;
     margin-top: 1.5rem;
   }
+  #StartTime,#EndTime,#LeaveTime,#TiersTemps{
+    font-weight: bold;
+  }
   .alert{
     width: 45ch;
   }
   .dotted{
     border-bottom: 2px dotted black;
     font-weight: bold;
+  }
+  .blue{
+    background-color:rgb(26,112,178) !important ;
+    color:white
   }
   .cartouche-manuscrite, .cartouche-dematerialise{
     border: 1px solid #ced4da;
@@ -337,10 +337,7 @@ export default ({
     font-size: small;
   }
   .clock{
-    border: 1px solid #ced4da;
-    border-radius: .375rem;
-    padding: 0.1rem 1rem;
-    
+    font-size: xx-large;
   }
   #CurrentTime{
     font-size: 78pt;
