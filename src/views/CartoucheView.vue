@@ -1,5 +1,4 @@
 <script>
-import { defineComponent } from 'vue'
 import axios from "axios";
 import FooterBase from '@/components/FooterBase.vue';
 import moment from 'moment';
@@ -95,7 +94,6 @@ export default ({
         let fullMinutes = Math.round((((tiersTempsInSeconds / 3600)) - fullHours)*60)
 
         return {Hours:fullHours, Minutes: fullMinutes}
-        
       },
       onSubmit(e) {
         e.preventDefault();
@@ -105,7 +103,6 @@ export default ({
     beforeMount() {
       this.apiUrl = import.meta.env.VITE_API_URL
       this.getCartouche()
-      
     },
     mounted(){
       this.getAlerts() //recup les alertes dès le chargement de la page
@@ -152,7 +149,7 @@ export default ({
           <div v-if="this.cartouche.estdematerialise === 0" class="cartouche-manuscrite">
               <div class="d-flex justify-content-between line mb-3">
                   <div class="d-flex"><label>Académie : </label> <b><p class="ms-2">{{ this.cartouche.formation.academie }}</p></b></div>
-                  <div class="d-flex"><label>Session : </label> <b><p class="ms-2">{{ this.cartouche.session }}</p></b></div>
+                  <div class="d-flex"><label>Session : </label> <b><p class="ms-2">{{ new Date(this.cartouche.date).getFullYear() }}</p></b></div>
                   <div class="d-flex"><label class="text-muted">Modèle EN. </label> </div>
               </div>
               <div class="d-flex justify-content-between line mb-3">
@@ -179,7 +176,7 @@ export default ({
               </div>
               <div class="d-flex justify-content-between mb-1 flex-grow-1">
                     <div class="d-flex w-75"></div>
-                    <div class="d-flex me-4 w-25"><label>Session&nbsp;: </label><p class="ms-2 mb-1 dotted w-100 pe-4">{{ this.cartouche.session }}</p></div>
+                    <div class="d-flex me-4 w-25"><label>Session&nbsp;: </label><p class="ms-2 mb-1 dotted w-100 pe-4">{{ new Date(this.cartouche.date).getFullYear() }}</p></div>
               </div>
           </div>
 
