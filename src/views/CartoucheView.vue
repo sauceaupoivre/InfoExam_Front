@@ -2,6 +2,7 @@
 import { defineComponent } from 'vue'
 import axios from "axios";
 import FooterBase from '@/components/FooterBase.vue';
+import moment from 'moment';
 
 export default ({
     name: "CartoucheView",
@@ -67,6 +68,10 @@ export default ({
         
         let h = this.startHour.getHours(); // 0 - 23
         let m = this.startHour.getMinutes(); // 0 - 59
+
+        const dateTiersTemps = moment(this.startHour).add(datefin.getHours() + this.tiersTemps(this.cartouche.epreuve.duree).Hours,'hours')
+        dateTiersTemps.add(this.tiersTemps(this.cartouche.epreuve.duree).Minutes,'minutes')
+        console.log(dateTiersTemps)
         
         h = (h < 10) ? "0" + h : h;
         m = (m < 10) ? "0" + m : m;
@@ -75,6 +80,7 @@ export default ({
         document.getElementById("StartTime").textContent = time;
         document.getElementById("EndTime").textContent = (this.startHour.getHours() + datefin.getHours())+ ":" + m ;
         document.getElementById("LeaveTime").textContent = (this.startHour.getHours() + sortieAllow.getHours()) + ":" + m ;
+        document.getElementById("TiersTemps").textContent = this.startHour.getHours() + datefin.getHours() + this.tiersTemps(this.cartouche.epreuve.duree).Hours + ":"  + (m + this.tiersTemps(this.cartouche.epreuve.duree).Minutes)
         
         //setTimeout(this.startClock, 1000);
       },
@@ -93,6 +99,19 @@ export default ({
         document.getElementById("CurrentTime").textContent = time;
        
         //setTimeout(this.currentTime, 1000);
+      },
+      tiersTemps(date){
+        let ladate = new Date("2011-10-10T"+date)
+        let hourSeconds = ladate.getHours()*60*60;
+        let  minuteSeconds = ladate.getMinutes()*60
+        let seconds = ladate.getSeconds()
+        
+        let tiersTempsInSeconds = (hourSeconds+minuteSeconds+seconds)/3
+        let fullHours = Math.trunc(tiersTempsInSeconds / 3600)
+        let fullMinutes = Math.round((((tiersTempsInSeconds / 3600)) - fullHours)*60)
+
+        return {Hours:fullHours, Minutes: fullMinutes}
+        
       }
     },
     beforeMount() {
@@ -219,6 +238,10 @@ export default ({
               <div class="d-flex justify-content-center mx-2 clock">
                 <label for="EndTime">Heure de fin :&nbsp;</label>
                 <div id="EndTime" ></div>
+              </div>
+              <div class="d-flex justify-content-center mx-2 clock">
+                <label for="TiersTemps">Heure de fin tiers temps :&nbsp;</label>
+                <div id="TiersTemps" ></div>
               </div>
           </div>
         </div>
