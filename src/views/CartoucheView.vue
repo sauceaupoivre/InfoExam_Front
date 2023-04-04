@@ -109,6 +109,9 @@ export default ({
 
         return {Hours:fullHours, Minutes: fullMinutes}
       },
+      moment: function (date) {
+        return moment(date);
+      }
     },
     beforeMount() {
       this.apiUrl = import.meta.env.VITE_API_URL
@@ -128,6 +131,8 @@ export default ({
           this.currentTime()
       },1000)
       setTimeout(() => { clearInterval(this.clockInterval) }, 14400000) //arret auto au bout de 4heures
+
+      
     },
     updated(){
       if(this.cartouche.startTime != null){
@@ -256,7 +261,10 @@ export default ({
           <div v-if="this.alerts.length != 0">
             <div v-for="alert in this.alerts">
               <div v-if="alert.done == 1" class="border rounded p-3 my-2 past-alert">
-                <h4><i class="bi bi-exclamation-triangle-fill"></i> {{alert.titre}}</h4>
+                <div class="d-flex justify-content-between align-items-center">
+                  <h4><i class="bi bi-exclamation-triangle-fill"></i> {{alert.titre}}</h4>
+                  <small v-if="alert.created_at">{{ moment(alert.created_at).format('DD-MM HH:mm:ss')  }}</small>
+                </div>
                 <hr>
                 <p>{{alert.description}}</p>
               </div>
@@ -272,7 +280,9 @@ export default ({
       <div v-if="this.alerts.length != 0" class="p-4 mt-4 ms-3 position-absolute end-0">
         <div v-for="alert in this.alerts" >
           <div v-if="alert.done == 0" class="alert alert-danger alert-dismissible fade show" role="alert">
-            <h2 class="blink"><i class="bi bi-exclamation-triangle-fill"></i> {{alert.titre}}</h2>
+            <div>
+              <h2 class="blink"><i class="bi bi-exclamation-triangle-fill"></i> {{alert.titre}}</h2>
+            </div>
             <hr>
             <p>{{alert.description}}</p>
             <button @click="alertDone(alert.id)" type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
