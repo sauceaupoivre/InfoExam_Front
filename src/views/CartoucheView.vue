@@ -20,6 +20,7 @@ export default ({
         pollInterval: null,
         clockInterval:null,
         startHour: null,
+        cartoucheDisplay: true,
       }
     },
     methods: {
@@ -158,7 +159,7 @@ export default ({
             </router-link>
           </div>
           <!-- CARTOUCHE MANUSCRITE -->
-          <div v-if="this.cartouche.estdematerialise === 0" class="cartouche-manuscrite">
+          <div v-if="this.cartouche.estdematerialise === 0 && this.cartoucheDisplay === true" class="cartouche-manuscrite">
               <div class="d-flex justify-content-between line mb-3">
                   <div class="d-flex"><label>Académie : </label> <b><p class="ms-2">{{ this.cartouche.formation.academie }}</p></b></div>
                   <div class="d-flex"><label>Session : </label> <b><p class="ms-2">{{ new Date(this.cartouche.date).getFullYear() }}</p></b></div>
@@ -176,8 +177,8 @@ export default ({
                   <div class="d-flex"><label>Épreuve/sous-épreuve : </label> <b><p class="ms-2">{{ this.cartouche.epreuve.epreuve }}</p></b></div>
               </div>
           </div>
-          <!-- CARTOUCHE DEMATERIALISE -->
-          <div v-else class="cartouche-dematerialise">
+          <!-- CARTOUCHE DEMATERIALISE --> 
+          <div v-else-if="this.cartouche.estdematerialise === 1 && this.cartoucheDisplay === true" class="cartouche-dematerialise">
               <div class="d-flex justify-content-between mb-1 flex-grow-1">
                     <div class="d-flex w-100"><label>Concours&nbsp;/&nbsp;Examen&nbsp;: </label><p class="mx-2 w-100 dotted">{{ this.cartouche.epreuve.examen_concours }}</p></div>
                     <div class="d-flex me-4"><label>Section&nbsp;/&nbsp;Specialite&nbsp;/&nbsp;Série&nbsp;: </label><p class="ms-2 dotted pe-4">{{ this.cartouche.formation.serie }}</p></div>
