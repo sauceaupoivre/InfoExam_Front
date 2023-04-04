@@ -20,7 +20,6 @@ export default ({
         pollInterval: null,
         clockInterval:null,
         startHour: null,
-        starthourEdit: '',
       }
     },
     methods: {
@@ -60,8 +59,11 @@ export default ({
           .catch((error) => {console.log("Erreur: ", error)})
       },
       startClock(){ //Calcule tous les temps de sortis etc..
-        if(this.startHour === null){
-          this.startHour = moment()
+        if(this.cartouche.startTime === null){
+          this.startHour = moment();
+          this.startTimeUpdate();
+        }else{
+          this.startHour = moment(this.cartouche.startTime);
         }
         let datefin = moment("2011-10-10 "+this.cartouche.epreuve.duree);
         let sortieAllow = moment(this.cartouche.epreuve.loge)
@@ -75,9 +77,20 @@ export default ({
         document.getElementById("EndTime").textContent = moment(this.startHour).add(datefin.hours(),'hours').format("HH:mm")
         document.getElementById("TiersTemps").textContent = dateTiersTemps.format("HH:mm")
       },
-      editStartHour(){
-        this.startHour = moment("2011-10-10 "+this.starthourEdit+":00")
-        this.startClock()
+      startTimeUpdate(){
+        axios.put(this.apiUrl + "cartouches/examen/start/" + this.cartouche.id, {startTime: this.startHour.format("YYYY-MM-DD HH:mm:ss")})
+          .then((response) => { 
+          })
+          .catch((error) => {console.error('Erreur : ', error);})
+      },
+      stopHour(){
+        if (confirm("Voulez vous réinitialiser les heures?")){
+          axios.put(this.apiUrl + "cartouches/examen/start/stop/" + this.cartouche.id)
+          .then((response) => { 
+            this.$router.go() 
+          })
+          .catch((error) => {console.error('Erreur : ', error);})
+        }
       },
       currentTime(){ //fonction Horloge
         let time = moment();
@@ -95,10 +108,6 @@ export default ({
 
         return {Hours:fullHours, Minutes: fullMinutes}
       },
-      onSubmit(e) {
-        e.preventDefault();
-        this.editStartHour()
-      }
     },
     beforeMount() {
       this.apiUrl = import.meta.env.VITE_API_URL
@@ -120,6 +129,9 @@ export default ({
       setTimeout(() => { clearInterval(this.clockInterval) }, 14400000) //arret auto au bout de 4heures
     },
     updated(){
+      if(this.cartouche.startTime != null){
+        this.startClock();
+      }
       this.currentTime()
     },
     unmounted(){
@@ -207,10 +219,9 @@ export default ({
         <div class="clock-container text-center">
           
           <button v-if="this.startHour == null" class="btn btn-primary px-4" type="button" @click="startClock()">Démarrer l'épreuve <i class="bi bi-play-fill"></i></button>
-          <form v-if="this.startHour != null" class="d-flex align-items-center justify-content-center" v-on:submit.prevent="onSubmit">
-            <input v-model="this.starthourEdit" type="time" class="form-control w-25 " min="00:00" max="24:00" required>
-            <button class="btn btn-primary" type="submit">Changer&nbsp;l'heure&nbsp;de&nbsp;début</button> 
-          </form>
+          <div v-if="this.startHour != null" class="d-flex align-items-center justify-content-center">
+            <button @click="this.stopHour()" class="btn btn-primary" type="submit">Réinitialiser&nbsp;les&nbsp;heures&nbsp;</button> 
+          </div>
 
           <div id="CurrentTime" class="currentClock"></div>
 
