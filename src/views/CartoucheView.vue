@@ -19,7 +19,12 @@ export default ({
         alerts: [],
         pollInterval: null,
         clockInterval:null,
+
         startHour: null,
+        sortieAllow:null,
+        datefin: null,
+        dateTiersTemps:null,
+
         cartoucheDisplay: true,
       }
     },
@@ -66,17 +71,20 @@ export default ({
         }else{
           this.startHour = moment(this.cartouche.startTime);
         }
-        let datefin = moment("2011-10-10 "+this.cartouche.epreuve.duree);
-        let sortieAllow = moment(this.cartouche.epreuve.loge)
+        this.datefin = moment(this.startHour).add(this.cartouche.epreuve.duree,'hours');
+        this.sortieAllow = (this.sortieAllow = moment(this.startHour).add(moment(this.cartouche.epreuve.loge).hours(),'hours'))
         
-        let dateTiersTemps = moment(this.startHour)
-        dateTiersTemps.add(datefin.hours() + this.tiersTemps(this.cartouche.epreuve.duree).Hours,'hours')
-        dateTiersTemps.add(this.tiersTemps(this.cartouche.epreuve.duree).Minutes,'minutes')
+        
+        this.dateTiersTemps = moment(this.startHour)
+        this.dateTiersTemps.add(this.cartouche.epreuve.duree,'hours')
+        this.dateTiersTemps.add(this.tiersTemps(this.cartouche.epreuve.duree).Hours,'hours')
+        this.dateTiersTemps.add(this.tiersTemps(this.cartouche.epreuve.duree).Minutes,'minutes')
+        
 
         document.getElementById("StartTime").textContent = this.startHour.format("HH:mm");
-        document.getElementById("LeaveTime").textContent = moment(this.startHour).add(sortieAllow.hours(),'hours').format("HH:mm")
-        document.getElementById("EndTime").textContent = moment(this.startHour).add(datefin.hours(),'hours').format("HH:mm")
-        document.getElementById("TiersTemps").textContent = dateTiersTemps.format("HH:mm")
+        document.getElementById("LeaveTime").textContent = this.sortieAllow.format("HH:mm")
+        document.getElementById("EndTime").textContent = this.datefin.format("HH:mm")
+        document.getElementById("TiersTemps").textContent = this.dateTiersTemps.format("HH:mm")
       },
       startTimeUpdate(){
         axios.put(this.apiUrl + "cartouches/examen/start/" + this.cartouche.id, {startTime: this.startHour.format("YYYY-MM-DD HH:mm:ss")})
@@ -96,6 +104,18 @@ export default ({
       currentTime(){ //fonction Horloge
         let time = moment();
         document.getElementById("CurrentTime").textContent = time.format("HH:mm:ss");
+
+        if(this.sortieAllow != null && this.datefin != null && this.dateTiersTemps !=null){
+          if(this.sortieAllow.diff(time) <= 0){
+            document.getElementById("LeaveTime").classList.add("green")
+          }
+          if(this.datefin.diff(time) <= 0){
+            document.getElementById("EndTime").classList.add("green")
+          }
+          if(this.dateTiersTemps.diff(time) <= 0){
+            document.getElementById("TiersTemps").classList.add("green")
+          }
+        }
       },
       tiersTemps(date){
         let newDate = new Date("2011-10-10T"+date)
@@ -108,6 +128,14 @@ export default ({
         let fullMinutes = Math.round((((tiersTempsInSeconds / 3600)) - fullHours)*60)
 
         return {Hours:fullHours, Minutes: fullMinutes}
+      },
+      hideCartouche(){
+        if(this.cartoucheDisplay === true){
+          this.cartoucheDisplay = false;
+        }else{
+          this.cartoucheDisplay = true;
+        }
+        
       },
       moment: function (date) {
         return moment(date);
@@ -158,10 +186,11 @@ export default ({
     <div v-else class="d-flex">
       <div class="display-container d-flex align-items-center flex-column">
         <div class="cartouche-container">
-          <div>
+          <div class="mt-3 d-flex justify-content-between">
             <router-link to="/">
               <button class="btn btn-primary px-4">Retour</button>
             </router-link>
+            <button @click="this.hideCartouche()" class="btn btn-primary px-4" type="button">Afficher/Cacher&nbsp;la&nbsp;cartouche</button> 
           </div>
           <!-- CARTOUCHE MANUSCRITE -->
           <div v-if="this.cartouche.estdematerialise === 0 && this.cartoucheDisplay === true" class="cartouche-manuscrite">
@@ -198,27 +227,28 @@ export default ({
               </div>
           </div>
 
-          <div class="d-flex justify-content-end mb-3 position-relative">
-              <label class="me-2 w-25 text-end"><b>Repère de l'épreuve : </b></label>
-              <input  @input="updateRepere(this.cartouche.repere)" v-model="this.cartouche.repere" id="repere" class="input w-75" placeholder="À remplir par le surveillant" type="text">
-              <p class="position-absolute me-2" v-if="this.updatingRepere">Enregistrement...</p>
-          </div>
-          
-          <div class="d-flex justify-content-end mb-3">
-              <label class="me-2 w-25 text-end"><b>Règles : </b></label>
-              <p class="input w-75">
-                <b class="me-3" v-if="this.cartouche.dictionnaire === 1">Dictionnaire,</b>
-                <b class="me-3" v-else="this.cartouche.dictionnaire === 1">Dictionnaire interdit,</b>
-                <b class="mx-3" v-if="this.cartouche.calculatrice === 1">Calculatrice autorisée</b>
-                <b class="mx-3" v-else="this.cartouche.calculatrice === 1">Calculatrice interdite</b>
-              </p>
-          </div>
+          <div v-if="this.cartoucheDisplay === true">
+            <div class="d-flex justify-content-end mb-3 position-relative">
+                <label class="me-2 w-25 text-end"><b>Repère de l'épreuve : </b></label>
+                <input  @input="updateRepere(this.cartouche.repere)" v-model="this.cartouche.repere" id="repere" class="input w-75" placeholder="À remplir par le surveillant" type="text">
+                <p class="position-absolute me-2" v-if="this.updatingRepere">Enregistrement...</p>
+            </div>
+            
+            <div class="d-flex justify-content-end mb-3">
+                <label class="me-2 w-25 text-end"><b>Règles : </b></label>
+                <p class="input w-75">
+                  <b class="me-3" v-if="this.cartouche.dictionnaire === 1">Dictionnaire,</b>
+                  <b class="me-3" v-else="this.cartouche.dictionnaire === 1">Dictionnaire interdit,</b>
+                  <b class="mx-3" v-if="this.cartouche.calculatrice === 1">Calculatrice autorisée</b>
+                  <b class="mx-3" v-else="this.cartouche.calculatrice === 1">Calculatrice interdite</b>
+                </p>
+            </div>
 
-          <div class="position-relative">
-            <textarea @input="updateComment(this.cartouche.commentaire)" v-model="this.cartouche.commentaire" class="w-100 bordered p-2" placeholder="Commentaire..." rows="2"></textarea>
-            <p class="position-absolute me-3 mt-2 top-0 end-0" v-if="this.updatingCommentaire">Enregistrement...</p>
+            <div class="position-relative">
+              <textarea @input="updateComment(this.cartouche.commentaire)" v-model="this.cartouche.commentaire" class="w-100 bordered p-2" placeholder="Commentaire..." rows="2"></textarea>
+              <p class="position-absolute me-3 mt-2 top-0 end-0" v-if="this.updatingCommentaire">Enregistrement...</p>
+            </div>
           </div>
-          
         </div>
 
         <!-- Clock -->
@@ -226,7 +256,7 @@ export default ({
           
           <button v-if="this.startHour == null" class="btn btn-primary px-4" type="button" @click="startClock()">Démarrer l'épreuve <i class="bi bi-play-fill"></i></button>
           <div v-if="this.startHour != null" class="d-flex align-items-center justify-content-center">
-            <button @click="this.stopHour()" class="btn btn-primary" type="submit">Réinitialiser&nbsp;les&nbsp;heures&nbsp;</button> 
+            <button @click="this.stopHour()" class="btn btn-primary" type="button">Réinitialiser&nbsp;les&nbsp;heures&nbsp;</button> 
           </div>
 
           <div id="CurrentTime" class="currentClock"></div>
@@ -302,7 +332,9 @@ export default ({
   }
   .display-container{
     width: 70vw;
-    margin: 1rem;
+    margin: 0 1rem;
+    height: 100vh;
+    overflow-y: auto;
   }
   .cartouche-container{
     width: 92ch;
@@ -314,6 +346,9 @@ export default ({
   #StartTime,#EndTime,#LeaveTime,#TiersTemps{
     font-weight: bold;
   }
+  #EndTime,#LeaveTime,#TiersTemps{
+    color: red;
+  }
   .alert{
     width: 45ch;
   }
@@ -324,6 +359,9 @@ export default ({
   .blue{
     background-color:rgb(26,112,178) !important ;
     color:white
+  }
+  .green{
+    color: green !important;
   }
   .cartouche-manuscrite, .cartouche-dematerialise{
     border: 1px solid #ced4da;
