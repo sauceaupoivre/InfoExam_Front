@@ -75,12 +75,10 @@ export default ({
         this.datefin = moment(this.startHour).add(this.cartouche.epreuve.duree,'hours');
         this.sortieAllow = (this.sortieAllow = moment(this.startHour).add(moment(this.cartouche.epreuve.loge).hours(),'hours'))
         
-        
         this.dateTiersTemps = moment(this.startHour)
         this.dateTiersTemps.add(this.cartouche.epreuve.duree,'hours')
         this.dateTiersTemps.add(this.tiersTemps(this.cartouche.epreuve.duree).Hours,'hours')
         this.dateTiersTemps.add(this.tiersTemps(this.cartouche.epreuve.duree).Minutes,'minutes')
-        
 
         document.getElementById("StartTime").textContent = this.startHour.format("HH:mm");
         document.getElementById("LeaveTime").textContent = this.sortieAllow.format("HH:mm")
@@ -136,7 +134,6 @@ export default ({
         }else{
           this.cartoucheDisplay = true;
         }
-        
       },
       moment: function (date) {
         return moment(date);
@@ -161,8 +158,6 @@ export default ({
           this.currentTime()
       },1000)
       setTimeout(() => { clearInterval(this.clockInterval) }, 14400000) //arret auto au bout de 4heures
-
-      
     },
     updated(){
       if(this.cartouche.startTime != null){
@@ -261,8 +256,7 @@ export default ({
             <button @click="this.stopHour()" class="btn btn-primary" type="button">Réinitialiser&nbsp;les&nbsp;heures&nbsp;</button> 
           </div>
 
-          <div id="CurrentTime" class="currentClock"></div>
-
+          <div id="CurrentTime" class="currentClock"></div> <!-- HORLOGE -->
 
           <table class="table bordered clock table-bordered shadow">
             <thead class="blue">
