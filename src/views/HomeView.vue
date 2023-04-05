@@ -80,7 +80,7 @@ export default ({
       }
     },
     mounted() {
-      this.apiUrl = import.meta.env.VITE_API_URL
+      this.apiUrl = import.meta.env.VITE_API_URL +"/pdf"
     },
     updated(){
       this.isDisabeld();
