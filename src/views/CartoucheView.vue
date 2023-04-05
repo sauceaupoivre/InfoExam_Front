@@ -156,13 +156,13 @@ export default ({
       //Interval de l'horloge
       this.clockInterval = setInterval(() =>{
           this.currentTime()
+          if(this.cartouche.startTime != null){
+            this.startClock();
+          }
       },1000)
       setTimeout(() => { clearInterval(this.clockInterval) }, 14400000) //arret auto au bout de 4heures
     },
     updated(){
-      if(this.cartouche.startTime != null){
-        this.startClock();
-      }
       this.currentTime()
     },
     unmounted(){
