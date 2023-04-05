@@ -11,6 +11,7 @@ export default ({
     data(){
       return {
         apiUrl: '',
+        pdfUrl: '',
         loading: false,
         updatingRepere: false,
         updatingCommentaire: false,
@@ -142,7 +143,8 @@ export default ({
       }
     },
     beforeMount() {
-      this.apiUrl = import.meta.env.VITE_API_URL
+      this.apiUrl = import.meta.env.VITE_API_URL +"api/"
+      this.pdfUrl = import.meta.env.VITE_API_URL +"pdf/"
       this.getCartouche()
     },
     mounted(){
@@ -297,6 +299,7 @@ export default ({
                 </div>
                 <hr>
                 <p>{{alert.description}}</p>
+                <a v-if="alert.pdf" target="_blank"  :href="href=this.pdfUrl+alert.pdf">{{ alert.pdf }}</a>
               </div>
             </div>
           </div>
@@ -315,6 +318,7 @@ export default ({
             </div>
             <hr>
             <p>{{alert.description}}</p>
+            <a v-if="alert.pdf" target="_blank" :href="href=this.pdfUrl+alert.pdf">{{ alert.pdf }}</a>
             <button @click="alertDone(alert.id)" type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
         </div>
